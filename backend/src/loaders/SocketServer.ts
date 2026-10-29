@@ -7,7 +7,12 @@ class SocketServer {
   private readonly gateways: SocketGateway[] = [];
 
   constructor(server: Server, gateways: SocketGateway[] = []) {
-    this.io = new SocketIO.Server(server);
+    this.io = new SocketIO.Server(server, {
+      cors: {
+        origin: process.env.FRONTEND_URL ?? "http://localhost:5173",
+        methods: ["GET", "POST"],
+      },
+    });
     this.listen();
     gateways.forEach((g) => this.register(g));
   }

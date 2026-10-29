@@ -49,6 +49,7 @@ class RoomService {
       config,
     };
     this.rooms.set(roomId, room);
+    console.log(this.rooms);
     return room;
   }
 
@@ -60,12 +61,23 @@ class RoomService {
     const room = this.rooms.get(roomId);
     if (!room) return undefined;
 
+    if (room.members.length >= room.config.maxPlayers) {
+      return undefined;
+    }
+
+    const existingMember = room.members.find((m) => m.userName === userName);
+
+    if (existingMember) {
+      return undefined;
+    }
+
     const member: Member = {
       userId: Math.random().toString(36).substring(2, 8),
       userName,
       isHost: false,
     };
     room.members.push(member);
+    console.log(this.rooms);
     return member;
   }
 
@@ -77,6 +89,7 @@ class RoomService {
     if (memberIndex === -1) return false;
 
     room.members.splice(memberIndex, 1);
+    console.log(this.rooms);
     return true;
   }
 

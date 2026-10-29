@@ -40,6 +40,7 @@ export class JoinRoomEvent extends SocketEvent<Payload, Result> {
       ctx.nsp.emit("room_joined", {
         roomId: ctx.payload.roomId,
         userName: ctx.payload.userName,
+        roomData,
       });
       ctx.ack?.({ ok: true, data: { success: true, roomData } });
     } catch (error) {

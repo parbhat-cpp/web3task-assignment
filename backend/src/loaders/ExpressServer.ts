@@ -32,7 +32,9 @@ class ExpressServer {
     });
 
     // TODO: Add your API routes here
-    this.expressApp.use("/api", (r, res) => {});
+    this.expressApp.use("/api", (r, res) => {
+      res.json({ message: "API is working!" });
+    });
 
     this.expressServer = this.expressApp.listen(this.port, () => {
       console.log("Express server is running on port:", this.port);

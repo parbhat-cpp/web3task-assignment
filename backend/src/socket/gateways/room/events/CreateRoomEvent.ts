@@ -53,7 +53,10 @@ export class CreateRoomEvent extends SocketEvent<Payload, Result> {
         ctx.payload.hostName,
         ctx.payload,
       );
-      ctx.nsp.emit("room_created", { roomId: room.roomId });
+      if (!room) {
+        throw new EventError("room_creation_failed");
+      }
+      ctx.nsp.emit("room_created", { roomId: room.roomId, roomData: room });
       ctx.ack?.({ ok: true, data: { success: true, roomId: room.roomId } });
     } catch (error) {
       throw new EventError("room_creation_failed");
