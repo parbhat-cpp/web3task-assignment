@@ -22,6 +22,35 @@ type Message = {
   text: string;
 };
 
+type InviteLinkProps = {
+  roomId: string;
+};
+
+function InviteLink({ roomId }: InviteLinkProps) {
+  const inviteUrl = `${window.location.origin}/invite/${roomId}`;
+
+  const copyInviteLink = async () => {
+    try {
+      await navigator.clipboard.writeText(inviteUrl);
+      toast.success("Invite link copied");
+    } catch (error) {
+      console.error("Unable to copy invite link", error);
+      toast.error("Unable to copy invite link");
+    }
+  };
+
+  return (
+    <button
+      type="button"
+      className="toolbar-button"
+      onClick={copyInviteLink}
+      aria-label="Copy room invite link"
+    >
+      Invite friends
+    </button>
+  );
+}
+
 function Room() {
   const socket = useSocket("room");
   const navigate = useNavigate();
@@ -135,6 +164,7 @@ function Room() {
           </h2>
         </div>
         <div className="round-status">
+          {roomId !== "unknown" && <InviteLink roomId={roomId} />}
           <span onClick={handleLeaveRoom}>
             <IoExit />
           </span>
