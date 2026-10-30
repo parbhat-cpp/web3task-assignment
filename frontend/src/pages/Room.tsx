@@ -165,9 +165,15 @@ function Room() {
         </div>
         <div className="round-status">
           {roomId !== "unknown" && <InviteLink roomId={roomId} />}
-          <span onClick={handleLeaveRoom}>
-            <IoExit />
-          </span>
+          <button
+            type="button"
+            className="toolbar-button leave-room-button"
+            onClick={handleLeaveRoom}
+            aria-label="Leave room"
+            title="Leave room"
+          >
+            <IoExit size={22} />
+          </button>
           <span className="status-dot" aria-hidden="true" />
           <span>Round 1 of 3</span>
           <strong>01:00</strong>
