@@ -34,6 +34,45 @@ export const SendChatSchema = z.object({
   message: z.string().min(1).max(200),
 });
 
+const DrawPointSchema = z.object({
+  x: z.number().min(0).max(1),
+  y: z.number().min(0).max(1),
+});
+
+export const DrawSchema = z.discriminatedUnion("action", [
+  z.object({
+    roomId: z.string().min(1).max(10),
+    action: z.literal("start"),
+    point: DrawPointSchema,
+    color: z.string().regex(/^#[0-9a-f]{6}$/i),
+    size: z.number().positive().max(10),
+    tool: z.enum(["pen", "eraser"]),
+  }),
+  z.object({
+    roomId: z.string().min(1).max(10),
+    action: z.literal("segment"),
+    start: DrawPointSchema,
+    control: DrawPointSchema,
+    end: DrawPointSchema,
+    color: z.string().regex(/^#[0-9a-f]{6}$/i),
+    size: z.number().positive().max(10),
+    tool: z.enum(["pen", "eraser"]),
+  }),
+  z.object({
+    roomId: z.string().min(1).max(10),
+    action: z.literal("end"),
+    start: DrawPointSchema,
+    end: DrawPointSchema,
+    color: z.string().regex(/^#[0-9a-f]{6}$/i),
+    size: z.number().positive().max(10),
+    tool: z.enum(["pen", "eraser"]),
+  }),
+  z.object({
+    roomId: z.string().min(1).max(10),
+    action: z.literal("clear"),
+  }),
+]);
+
 type Member = {
   userId: string;
   userName: string;

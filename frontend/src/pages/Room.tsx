@@ -8,6 +8,7 @@ import { useSocket } from "../../hooks/useSocket";
 import toast from "react-hot-toast";
 import { MdGroupRemove } from "react-icons/md";
 import { IoExit } from "react-icons/io5";
+import DrawingCanvas from "../components/DrawingCanvas";
 
 type Member = {
   id: string;
@@ -238,39 +239,9 @@ function Room() {
 
         <section className="canvas-panel" aria-label="Drawing canvas">
           <div className="canvas-toolbar">
-            <span className="canvas-label">Maya is drawing</span>
-            <button
-              type="button"
-              className="toolbar-button"
-              aria-label="Clear canvas"
-            >
-              Clear
-            </button>
+            {false && <span className="canvas-label">Maya is drawing</span>}
           </div>
-          <div className="canvas-wrap">
-            <canvas className="drawing-canvas" aria-label="Drawing board" />
-            <div className="canvas-empty-state">
-              <span className="canvas-crosshair" aria-hidden="true">
-                +
-              </span>
-              <p>Canvas ready</p>
-              <small>Take your best guess in the chat</small>
-            </div>
-          </div>
-          <div className="canvas-tools" aria-label="Drawing tools">
-            <button
-              type="button"
-              className="tool-button active"
-              aria-label="Pen"
-            >
-              ●
-            </button>
-            <button type="button" className="tool-button" aria-label="Eraser">
-              ⌫
-            </button>
-            <span className="tool-divider" />
-            <span className="color-swatch" aria-label="Current color" />
-          </div>
+          <DrawingCanvas roomId={roomId} />
         </section>
 
         <aside className="room-panel chat-panel" aria-labelledby="chat-title">
