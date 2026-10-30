@@ -27,6 +27,13 @@ export const LeaveRoomSchema = z.object({
   userId: z.string().min(1).max(36),
 });
 
+export const SendChatSchema = z.object({
+  roomId: z.string().min(1).max(10),
+  userId: z.string().min(1).max(36),
+  userName: z.string().min(1).max(14),
+  message: z.string().min(1).max(200),
+});
+
 type Member = {
   userId: string;
   userName: string;
@@ -44,6 +51,13 @@ class RoomService {
 
   constructor() {
     this.rooms = new Map();
+  }
+
+  isMemberInRoom(roomId: string, userId: string): boolean {
+    const room = this.rooms.get(roomId);
+    if (!room) return false;
+
+    return room.members.some((m) => m.userId === userId);
   }
 
   createRoom(

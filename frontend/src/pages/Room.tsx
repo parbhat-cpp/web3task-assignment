@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import type { FormEvent } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import "./Room.css";
@@ -17,7 +17,7 @@ type Member = {
 };
 
 type Message = {
-  id: number;
+  id: string;
   name: string;
   text: string;
 };
@@ -33,15 +33,24 @@ function Room() {
   const [message, setMessage] = useState("");
   const [userId] = useState(localStorage.getItem("userId") ?? "");
 
+  const username = useMemo(() => {
+    return room?.members.find((m) => m.userId === userId)?.userName ?? "";
+  }, []);
+
   const sendMessage = (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     const text = message.trim();
     if (!text) return;
+    if (!socket) return;
 
-    setMessages((current) => [
-      ...current,
-      { id: Date.now(), name: "You", text },
-    ]);
+    socket.emit("send_chat", {
+      roomId: room?.roomId,
+      userId,
+      userName: username,
+      message: text,
+    });
+
+    setMessages((current) => [...current, { id: userId, name: "You", text }]);
     setMessage("");
   };
 
@@ -75,6 +84,16 @@ function Room() {
       toast.success(`${data.memberName} has left the room`);
       setRoom(data.roomData);
     });
+    socket.on("receive_chat", (data) => {
+      setMessages((current) => [
+        ...current,
+        {
+          id: data.userId,
+          name: data.userName,
+          text: data.message,
+        },
+      ]);
+    });
 
     return () => {
       socket.off("room_member_joined");
@@ -84,6 +103,7 @@ function Room() {
       socket.off("room_member_removed");
       socket.off("leave_room");
       socket.off("member_left");
+      socket.off("receive_chat");
     };
   }, [socket]);
 
