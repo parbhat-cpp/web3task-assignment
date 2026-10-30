@@ -3,6 +3,8 @@ import type RoomService from "../../../services/RoomService";
 import { SocketGateway } from "../../core/SocketGateway";
 import { CreateRoomEvent } from "./events/CreateRoomEvent";
 import { JoinRoomEvent } from "./events/JoinRoomEvent";
+import { RemoveMemberEvent } from "./events/RemoveMemberEvent";
+import { LeaveRoomEvent } from "./events/LeaveRoomEvent";
 
 export class RoomGateway extends SocketGateway {
   readonly namespace = "/room";
@@ -15,8 +17,13 @@ export class RoomGateway extends SocketGateway {
     return [
       new CreateRoomEvent(this.roomService),
       new JoinRoomEvent(this.roomService),
+      new RemoveMemberEvent(this.roomService),
+      new LeaveRoomEvent(this.roomService),
     ];
   }
 
-  protected onConnect(socket: Socket) {}
+  protected onConnect(socket: Socket) {
+    socket.join(`user:${socket.data.userId}`);
+    socket.emit("session", { userId: socket.data.userId });
+  }
 }

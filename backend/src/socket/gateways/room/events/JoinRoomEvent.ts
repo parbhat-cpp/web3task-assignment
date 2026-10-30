@@ -32,7 +32,7 @@ export class JoinRoomEvent extends SocketEvent<Payload, Result> {
       const result = this.roomService.addMember(
         ctx.payload.roomId,
         ctx.payload.userName,
-        ctx.socket.id,
+        ctx.socket.data.userId,
       );
       if (!result) {
         throw new EventError("room_join_failed");
@@ -41,14 +41,28 @@ export class JoinRoomEvent extends SocketEvent<Payload, Result> {
       if (!roomData) {
         throw new EventError("room_not_found");
       }
-      ctx.nsp.emit("room_joined", {
+      ctx.socket.emit("room_joined", {
         roomId: ctx.payload.roomId,
         userName: ctx.payload.userName,
         roomData,
       });
+      const room = this.roomService.getRoom(ctx.payload.roomId);
+      if (!room) {
+        throw new EventError("room_not_found");
+      }
+      room.members.forEach((member) => {
+        if (member.userId !== ctx.socket.data.userId) {
+          ctx.nsp.to(`user:${member.userId}`).emit("room_member_joined", {
+            roomId: ctx.payload.roomId,
+            userName: ctx.payload.userName,
+            roomData,
+          });
+        }
+      });
       ctx.ack?.({ ok: true, data: { success: true, roomData } });
     } catch (error) {
-      throw new EventError("room_join_failed");
+      ctx.ack?.({ ok: false, error: "Unable to join room" });
+      console.error("Error in JoinRoomEvent:", error);
     }
   }
 }

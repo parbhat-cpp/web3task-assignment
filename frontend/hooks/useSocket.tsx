@@ -44,6 +44,12 @@ const SocketProvider = (props: SocketProviderProps) => {
         socket.on("connect", () => {
           console.log(name, "connected");
         });
+        socket.on(
+          "session",
+          ({ userId: connectedUserId }: { userId: string }) => {
+            window.localStorage.setItem("userId", connectedUserId);
+          },
+        );
         socket.on("disconnect", () => {
           console.log(name, "disconnected");
         });

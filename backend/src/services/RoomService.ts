@@ -16,6 +16,17 @@ export const JoinRoomSchema = z.object({
   userName: z.string().min(1).max(14),
 });
 
+export const RemoveMemberSchema = z.object({
+  roomId: z.string().min(1).max(10),
+  reqUserId: z.string().min(1).max(36),
+  userId: z.string().min(1).max(36),
+});
+
+export const LeaveRoomSchema = z.object({
+  roomId: z.string().min(1).max(10),
+  userId: z.string().min(1).max(36),
+});
+
 type Member = {
   userId: string;
   userName: string;
@@ -35,7 +46,11 @@ class RoomService {
     this.rooms = new Map();
   }
 
-  createRoom(hostName: string, userId: string, config: z.infer<typeof CreateRoomSchema>): Room {
+  createRoom(
+    hostName: string,
+    userId: string,
+    config: z.infer<typeof CreateRoomSchema>,
+  ): Room {
     const roomId = Math.random().toString(36).substring(2, 8);
     const room: Room = {
       roomId,
@@ -57,7 +72,11 @@ class RoomService {
     return this.rooms.get(roomId);
   }
 
-  addMember(roomId: string, userName: string, userId: string): Member | undefined {
+  addMember(
+    roomId: string,
+    userName: string,
+    userId: string,
+  ): Member | undefined {
     const room = this.rooms.get(roomId);
     if (!room) return undefined;
 
@@ -81,20 +100,36 @@ class RoomService {
     return member;
   }
 
-  removeMember(roomId: string, userId: string): boolean {
+  removeMember(roomId: string, userId: string): Member | undefined {
+    const room = this.rooms.get(roomId);
+    if (!room) return undefined;
+
+    const memberIndex = room.members.findIndex((m) => m.userId === userId);
+    if (memberIndex === -1) return undefined;
+
+    const member = room.members[memberIndex];
+    room.members.splice(memberIndex, 1);
+    console.log(this.rooms);
+    return member;
+  }
+
+  deleteRoom(roomId: string): boolean {
+    return this.rooms.delete(roomId);
+  }
+
+  promoteToHost(roomId: string, userId: string): boolean {
     const room = this.rooms.get(roomId);
     if (!room) return false;
 
     const memberIndex = room.members.findIndex((m) => m.userId === userId);
     if (memberIndex === -1) return false;
 
-    room.members.splice(memberIndex, 1);
+    room.members.forEach((m) => (m.isHost = false));
+    if (room.members[memberIndex]) {
+      room.members[memberIndex].isHost = true;
+    }
     console.log(this.rooms);
     return true;
-  }
-
-  deleteRoom(roomId: string): boolean {
-    return this.rooms.delete(roomId);
   }
 }
 

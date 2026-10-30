@@ -1,9 +1,13 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import type { FormEvent } from "react";
-import { useParams } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 import "./Room.css";
 import { roomAtom } from "../store/room.store";
 import { useAtom } from "jotai/react";
+import { useSocket } from "../../hooks/useSocket";
+import toast from "react-hot-toast";
+import { MdGroupRemove } from "react-icons/md";
+import { IoExit } from "react-icons/io5";
 
 type Member = {
   id: string;
@@ -19,11 +23,15 @@ type Message = {
 };
 
 function Room() {
-  const [room] = useAtom(roomAtom);
+  const socket = useSocket("room");
+  const navigate = useNavigate();
+
+  const [room, setRoom] = useAtom(roomAtom);
 
   const { roomId = "unknown" } = useParams();
   const [messages, setMessages] = useState([] as Message[]);
   const [message, setMessage] = useState("");
+  const [userId] = useState(localStorage.getItem("userId") ?? "");
 
   const sendMessage = (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
@@ -37,16 +45,79 @@ function Room() {
     setMessage("");
   };
 
+  useEffect(() => {
+    if (!socket) return;
+
+    socket.on("room_member_joined", (data) => {
+      toast.success(`${data.userName} joined the room`);
+      setRoom(data.roomData);
+    });
+
+    socket.on("not_authorized", () => {
+      toast.error("You are not authorized to remove this member");
+    });
+    socket.on("member_not_found", () => {
+      toast.error("Member not found");
+    });
+    socket.on("room_not_found", () => {
+      toast.error("Room not found");
+    });
+    socket.on("room_member_removed", (data) => {
+      toast.success(`${data.removedUsername} was removed from the room`);
+      setRoom(data.roomData);
+    });
+    socket.on("leave_room", () => {
+      navigate("/");
+      toast.success(`You have been removed from the room`);
+      setRoom(null);
+    });
+    socket.on("member_left", (data) => {
+      toast.success(`${data.memberName} has left the room`);
+      setRoom(data.roomData);
+    });
+
+    return () => {
+      socket.off("room_member_joined");
+      socket.off("not_authorized");
+      socket.off("member_not_found");
+      socket.off("room_not_found");
+      socket.off("room_member_removed");
+      socket.off("leave_room");
+      socket.off("member_left");
+    };
+  }, [socket]);
+
+  const handleRemoveMember = (userId: string) => {
+    if (!socket) return;
+    socket.emit("remove_member", {
+      roomId: room?.roomId,
+      reqUserId: localStorage.getItem("userId"),
+      userId,
+    });
+  };
+
+  const handleLeaveRoom = () => {
+    if (!socket) return;
+    socket.emit("leave_room", {
+      roomId: room?.roomId,
+      userId: localStorage.getItem("userId"),
+    });
+    setRoom(null);
+    navigate("/");
+  };
+
   return (
     <main className="room-shell">
       <header className="room-header">
         <div>
-          <div className="eyebrow">Sketch room</div>
-          <h1>
+          <h2>
             Room <span className="room-code">{room?.roomId}</span>
-          </h1>
+          </h2>
         </div>
         <div className="round-status">
+          <span onClick={handleLeaveRoom}>
+            <IoExit />
+          </span>
           <span className="status-dot" aria-hidden="true" />
           <span>Round 1 of 3</span>
           <strong>01:00</strong>
@@ -63,7 +134,9 @@ function Room() {
               <span className="panel-kicker">Players</span>
               <h2 id="members-title">Queue</h2>
             </div>
-            <span className="member-count">{room?.members.length}/8</span>
+            <span className="member-count">
+              {room?.members.length}/{room?.config.maxPlayers}
+            </span>
           </div>
           <ol className="member-list">
             {room?.members.map((member, index) => (
@@ -72,13 +145,26 @@ function Room() {
                 key={member.userId}
               >
                 <span className="member-number">0{index + 1}</span>
-                <span className="member-avatar">{member.userName.charAt(0)}</span>
+                <span className="member-avatar">
+                  {member.userName.charAt(0)}
+                </span>
                 <span className="member-details">
                   <strong>{member.userName}</strong>
-                  {member.isHost && <small>Host</small>}
+                  <span>
+                    {member.isHost && <small>Host</small>}
+                    {userId === member.userId && <small>(You)</small>}
+                  </span>
                   {/* {member.isDrawing && (
                     <small className="drawing-label">Drawing now</small>
-                  )} */}
+                    )} */}
+                </span>
+                <span>
+                  {userId === room?.members[0].userId &&
+                    userId !== member.userId && (
+                      <span onClick={() => handleRemoveMember(member.userId)}>
+                        <MdGroupRemove />
+                      </span>
+                    )}
                 </span>
                 {/* {member.isDrawing && (
                   <span className="turn-indicator" aria-label="Current turn">

@@ -25,7 +25,7 @@
 .room-code {
   color: var(--color-accent);
   font-family: 'DM Mono', monospace;
-  font-size: 0.42em;
+  font-size: 0.68em;
   letter-spacing: 0.08em;
   vertical-align: middle;
 }
