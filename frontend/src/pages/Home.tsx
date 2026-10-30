@@ -2,10 +2,13 @@ import { useEffect, useState } from "react";
 import type { FormEvent } from "react";
 import "../App.css";
 import { useSocket } from "../../hooks/useSocket";
+import { useAtom } from "jotai";
+import { roomAtom } from "../store/room.store";
+import { useNavigate } from "react-router-dom";
 
 type WordMode = "normal" | "hidden";
 
-type CreateRoomPayload = {
+export type CreateRoomPayload = {
   hostName: string;
   maxPlayers: number;
   rounds: number;
@@ -38,6 +41,9 @@ const initialJoinForm: JoinRoomPayload = {
 };
 
 function Home() {
+  const [, setRoom] = useAtom(roomAtom);
+  const navigate = useNavigate();
+
   const [mode, setMode] = useState<"create" | "join">("create");
   const [form, setForm] = useState<CreateRoomPayload>(initialForm);
   const [joinForm, setJoinForm] = useState<JoinRoomPayload>(initialJoinForm);
@@ -65,11 +71,17 @@ function Home() {
   useEffect(() => {
     if (socket) {
       socket.on("room_created", (data) => {
-        console.log("Room created:", data);
+        console.log(data);
+        
+        setRoom(data.roomData);
+        navigate(`/room/${data.roomId}`);
       });
 
       socket.on("room_joined", (data) => {
-        console.log("Room joined:", data);
+        console.log(data);
+
+        setRoom(data.roomData);
+        navigate(`/room/${data.roomId}`);
       });
     }
 

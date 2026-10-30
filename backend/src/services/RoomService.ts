@@ -35,13 +35,13 @@ class RoomService {
     this.rooms = new Map();
   }
 
-  createRoom(hostName: string, config: z.infer<typeof CreateRoomSchema>): Room {
+  createRoom(hostName: string, userId: string, config: z.infer<typeof CreateRoomSchema>): Room {
     const roomId = Math.random().toString(36).substring(2, 8);
     const room: Room = {
       roomId,
       members: [
         {
-          userId: Math.random().toString(36).substring(2, 8),
+          userId,
           userName: hostName,
           isHost: true,
         },
@@ -57,7 +57,7 @@ class RoomService {
     return this.rooms.get(roomId);
   }
 
-  addMember(roomId: string, userName: string): Member | undefined {
+  addMember(roomId: string, userName: string, userId: string): Member | undefined {
     const room = this.rooms.get(roomId);
     if (!room) return undefined;
 
@@ -72,7 +72,7 @@ class RoomService {
     }
 
     const member: Member = {
-      userId: Math.random().toString(36).substring(2, 8),
+      userId,
       userName,
       isHost: false,
     };

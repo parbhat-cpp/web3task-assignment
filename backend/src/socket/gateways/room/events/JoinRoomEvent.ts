@@ -29,7 +29,11 @@ export class JoinRoomEvent extends SocketEvent<Payload, Result> {
     ctx: EventContext<{ roomId: string; userName: string }, Result>,
   ): Promise<void> | void {
     try {
-      const result = this.roomService.addMember(ctx.payload.roomId, ctx.payload.userName);
+      const result = this.roomService.addMember(
+        ctx.payload.roomId,
+        ctx.payload.userName,
+        ctx.socket.id,
+      );
       if (!result) {
         throw new EventError("room_join_failed");
       }

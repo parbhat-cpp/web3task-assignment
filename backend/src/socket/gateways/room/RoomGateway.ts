@@ -18,11 +18,5 @@ export class RoomGateway extends SocketGateway {
     ];
   }
 
-  protected onConnect(socket: Socket) {
-    socket.join(`user:${socket.data.userId}`); // personal room for targeted emits
-  }
-
-  protected onDisconnect(socket: Socket, reason: string) {
-    console.log("left", socket.id, reason);
-  }
+  protected onConnect(socket: Socket) {}
 }

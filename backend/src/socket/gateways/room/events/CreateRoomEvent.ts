@@ -51,12 +51,13 @@ export class CreateRoomEvent extends SocketEvent<Payload, Result> {
     try {
       const room = this.roomService.createRoom(
         ctx.payload.hostName,
+        ctx.socket.id,
         ctx.payload,
       );
       if (!room) {
         throw new EventError("room_creation_failed");
       }
-      ctx.nsp.emit("room_created", { roomId: room.roomId, roomData: room });
+      ctx.socket.emit("room_created", { roomId: room.roomId, roomData: room });
       ctx.ack?.({ ok: true, data: { success: true, roomId: room.roomId } });
     } catch (error) {
       throw new EventError("room_creation_failed");
