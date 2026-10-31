@@ -24,6 +24,15 @@ type JoinRoomPayload = {
   userName: string;
 };
 
+type PublicRoom = {
+  roomId: string;
+  hostName: string;
+  memberCount: number;
+  maxPlayers: number;
+  rounds: number;
+  drawTime: number;
+};
+
 const initialForm: CreateRoomPayload = {
   hostName: "",
   maxPlayers: 8,
@@ -44,11 +53,41 @@ function Home() {
   const [, setRoom] = useAtom(roomAtom);
   const navigate = useNavigate();
 
-  const [mode, setMode] = useState<"create" | "join">("create");
+  const [mode, setMode] = useState<"create" | "join" | "public">("create");
   const [form, setForm] = useState<CreateRoomPayload>(initialForm);
   const [joinForm, setJoinForm] = useState<JoinRoomPayload>(initialJoinForm);
+  const [publicRooms, setPublicRooms] = useState<PublicRoom[]>([]);
+  const [publicRoomsError, setPublicRoomsError] = useState("");
+  const [isLoadingPublicRooms, setIsLoadingPublicRooms] = useState(false);
 
   const socket = useSocket("room");
+
+  useEffect(() => {
+    if (mode !== "public") return;
+
+    const loadPublicRooms = async () => {
+      setIsLoadingPublicRooms(true);
+      setPublicRoomsError("");
+      try {
+        const response = await fetch("http://localhost:5000/api/rooms/public");
+        if (!response.ok) {
+          throw new Error(`Public rooms request failed with status ${response.status}`);
+        }
+        const rooms: unknown = await response.json();
+        if (!Array.isArray(rooms)) {
+          throw new Error("Public rooms response has an invalid format");
+        }
+        setPublicRooms(rooms as PublicRoom[]);
+      } catch (error) {
+        console.error("Unable to load public rooms", error);
+        setPublicRoomsError("Unable to load public rooms. Please try again.");
+      } finally {
+        setIsLoadingPublicRooms(false);
+      }
+    };
+
+    loadPublicRooms();
+  }, [mode]);
 
   const updateField = <K extends keyof CreateRoomPayload>(
     field: K,
@@ -120,16 +159,77 @@ function Home() {
           >
             Join room
           </button>
+          <button
+            type="button"
+            role="tab"
+            aria-selected={mode === "public"}
+            className={mode === "public" ? "active" : ""}
+            onClick={() => setMode("public")}
+          >
+            Public rooms
+          </button>
         </div>
         <h1 id="page-title">
-          {mode === "create" ? "Create a room" : "Join a room"}
+          {mode === "create"
+            ? "Create a room"
+            : mode === "join"
+              ? "Join a room"
+              : "Public rooms"}
         </h1>
         <p className="intro">
           {mode === "create"
             ? "Set up your game, invite your friends, and start drawing."
-            : "Enter a room code and choose your name to start drawing."}
+            : mode === "join"
+              ? "Enter a room code and choose your name to start drawing."
+              : "Choose an open room and join the game."}
         </p>
 
+        {mode === "public" ? (
+          <section className="public-rooms" aria-label="Public rooms">
+            {isLoadingPublicRooms && (
+              <p className="public-rooms-status">Loading rooms...</p>
+            )}
+            {!isLoadingPublicRooms && publicRoomsError && (
+              <p className="public-rooms-status error">{publicRoomsError}</p>
+            )}
+            {!isLoadingPublicRooms &&
+              !publicRoomsError &&
+              publicRooms.length === 0 && (
+                <p className="public-rooms-status">
+                  No public rooms are available.
+                </p>
+              )}
+            <div className="public-room-list">
+              {publicRooms.map((publicRoom) => (
+                <article className="public-room-card" key={publicRoom.roomId}>
+                  <div>
+                    <span className="eyebrow">Room {publicRoom.roomId}</span>
+                    <h2>{publicRoom.hostName}'s room</h2>
+                    <p>
+                      {publicRoom.memberCount}/{publicRoom.maxPlayers} players
+                      {" · "}
+                      {publicRoom.rounds} rounds
+                      {" · "}
+                      {publicRoom.drawTime}s per turn
+                    </p>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setJoinForm((current) => ({
+                        ...current,
+                        roomId: publicRoom.roomId,
+                      }));
+                      setMode("join");
+                    }}
+                  >
+                    Join
+                  </button>
+                </article>
+              ))}
+            </div>
+          </section>
+        ) : (
         <form onSubmit={handleSubmit}>
           {mode === "create" ? (
             <>
@@ -327,6 +427,7 @@ function Home() {
             <span aria-hidden="true">→</span>
           </button>
         </form>
+        )}
       </section>
     </main>
   );

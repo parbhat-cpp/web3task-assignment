@@ -238,36 +238,56 @@
   line-height: 1.5;
 }
 
-.scoreboard {
-  margin-top: 16px;
-  border-top: 1px solid var(--color-border);
-  padding-top: 16px;
-}
-
-.scoreboard h3 {
-  margin: 5px 0 12px;
-  font-size: 0.9rem;
-}
-
-.scoreboard ol {
+.scorecard-list {
   display: grid;
-  gap: 7px;
-  margin: 0;
+  gap: 10px;
+  margin: 0 0 24px;
   padding: 0;
   list-style: none;
 }
 
-.scoreboard li {
+.scorecard-list li {
   display: flex;
-  justify-content: space-between;
+  align-items: center;
   gap: 12px;
+  border: 1px solid var(--color-border);
+  border-radius: 10px;
+  padding: 12px;
   color: var(--color-text-muted);
+  background: var(--color-surface-raised);
+}
+
+.scorecard-rank {
+  display: grid;
+  width: 26px;
+  height: 26px;
+  place-items: center;
+  border-radius: 50%;
+  color: var(--color-accent-dark);
+  background: var(--color-accent);
+  font-family: 'DM Mono', monospace;
   font-size: 0.72rem;
 }
 
-.scoreboard li strong {
+.scorecard-player {
+  display: grid;
+  flex: 1;
+  gap: 3px;
+}
+
+.scorecard-player strong {
+  color: var(--color-text);
+  font-size: 0.82rem;
+}
+
+.scorecard-player small {
+  font-size: 0.65rem;
+}
+
+.scorecard-score {
   color: var(--color-accent);
   font-family: 'DM Mono', monospace;
+  font-size: 1rem;
 }
 
 .canvas-panel {

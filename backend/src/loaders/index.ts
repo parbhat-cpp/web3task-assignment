@@ -5,11 +5,12 @@ import RoomService from "../services/RoomService";
 import { RoomGateway } from "../socket/gateways/room/RoomGateway";
 
 export default () => {
-  const expressServer = new ExpressServer();
+  const roomService = new RoomService();
+  const expressServer = new ExpressServer(roomService);
   const expressServerInstance = expressServer.server;
 
   const socketServer = new SocketServer(expressServerInstance, [
-    new RoomGateway(new RoomService()),
+    new RoomGateway(roomService),
   ]);
   const socketServerInstance = socketServer.instance;
 

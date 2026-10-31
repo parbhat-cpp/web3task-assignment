@@ -73,6 +73,7 @@ function Room() {
   const [message, setMessage] = useState("");
   const [userId] = useState(localStorage.getItem("userId") ?? "");
   const [isStartGameDialogOpen, setIsStartGameDialogOpen] = useState(false);
+  const [isScorecardOpen, setIsScorecardOpen] = useState(false);
   const [wordList, setWordList] = useState<WordList | null>(
     getCachedWordList(),
   );
@@ -253,6 +254,8 @@ function Room() {
         };
       });
       if (data.scoreboard) setScoreboard(data.scoreboard);
+      setIsStartGameDialogOpen(false);
+      setIsScorecardOpen(true);
     });
 
     return () => {
@@ -282,11 +285,12 @@ function Room() {
   };
 
   const handleLeaveRoom = () => {
-    if (!socket) return;
-    socket.emit("leave_room", {
-      roomId: room?.roomId,
-      userId: localStorage.getItem("userId"),
-    });
+    if (socket && room) {
+      socket.emit("leave_room", {
+        roomId: room.roomId,
+        userId: localStorage.getItem("userId"),
+      });
+    }
     setRoom(null);
     navigate("/");
   };
@@ -310,10 +314,7 @@ function Room() {
     }
 
     const updateRemainingTime = () => {
-      const seconds = Math.max(
-        0,
-        Math.ceil((turnEndTime - Date.now()) / 1000),
-      );
+      const seconds = Math.max(0, Math.ceil((turnEndTime - Date.now()) / 1000));
       setRemainingTurnSeconds(seconds);
 
       if (
@@ -376,7 +377,8 @@ function Room() {
   const handleStartGame = () => {
     if (!socket || !room || selectedWords.length !== wordCount) return;
 
-    const eventName = room.state.gameState === "waiting" ? "start_game" : "select_word";
+    const eventName =
+      room.state.gameState === "waiting" ? "start_game" : "select_word";
     socket.emit(eventName, {
       roomId: room.roomId,
       selectedWord: selectedWords[0],
@@ -481,22 +483,6 @@ function Room() {
             <span aria-hidden="true">✦</span>
             <p>Keep guesses in the chat. The artist cannot see the answer.</p>
           </div>
-          {room?.state.gameState === "finished" && (
-            <section className="scoreboard" aria-labelledby="scoreboard-title">
-              <span className="panel-kicker">Final results</span>
-              <h3 id="scoreboard-title">Scoreboard</h3>
-              <ol>
-                {displayedScoreboard.map((entry) => (
-                  <li key={entry.userId}>
-                    <span>
-                      {entry.rank}. {entry.userName}
-                    </span>
-                    <strong>{entry.score}</strong>
-                  </li>
-                ))}
-              </ol>
-            </section>
-          )}
         </aside>
 
         <section className="canvas-panel" aria-label="Drawing canvas">
@@ -510,8 +496,9 @@ function Room() {
                 type="button"
                 className="start-game-button"
                 onClick={openStartGameDialog}
+                disabled={!!remainingTurnSeconds}
               >
-                Start game
+                Select word and Start game
               </button>
             )}
           </div>
@@ -652,6 +639,39 @@ function Room() {
                 Start game
               </button>
             </div>
+          </section>
+        </div>
+      )}
+
+      {isScorecardOpen && (
+        <div className="dialog-backdrop">
+          <section
+            className="start-game-dialog scorecard-dialog"
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="scorecard-title"
+          >
+            <div className="dialog-header">
+              <div>
+                <span className="panel-kicker">Game complete</span>
+                <h2 id="scorecard-title">Final scorecard</h2>
+              </div>
+            </div>
+            <ol className="scorecard-list">
+              {displayedScoreboard.map((entry) => (
+                <li key={entry.userId}>
+                  <span className="scorecard-rank">{entry.rank}</span>
+                  <span className="scorecard-player">
+                    <strong>{entry.userName}</strong>
+                    {entry.userId === userId && <small>You</small>}
+                  </span>
+                  <strong className="scorecard-score">{entry.score}</strong>
+                </li>
+              ))}
+            </ol>
+            <button type="button" onClick={handleLeaveRoom}>
+              Exit to home
+            </button>
           </section>
         </div>
       )}

@@ -87,6 +87,54 @@ input {
   background: #c9ef81;
 }
 
+.public-rooms {
+  display: grid;
+  gap: 16px;
+}
+
+.public-room-list {
+  display: grid;
+  gap: 10px;
+}
+
+.public-room-card {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  border: 1px solid #383a34;
+  border-radius: 12px;
+  padding: 14px;
+  background: #20211d;
+}
+
+.public-room-card h2 {
+  margin: 5px 0;
+  font-size: 1rem;
+}
+
+.public-room-card p {
+  margin: 0;
+  color: #85867d;
+  font-size: 0.72rem;
+}
+
+.public-room-card button {
+  width: auto;
+  padding: 9px 14px;
+  font-size: 0.75rem;
+}
+
+.public-rooms-status {
+  margin: 0;
+  color: #aaa99f;
+  font-size: 0.82rem;
+}
+
+.public-rooms-status.error {
+  color: #ef9a9a;
+}
+
 h1 {
   margin: 0 0 8px;
   font-size: clamp(2.2rem, 7vw, 3.8rem);

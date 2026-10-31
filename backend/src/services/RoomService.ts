@@ -164,6 +164,29 @@ class RoomService {
     return this.rooms.get(roomId);
   }
 
+  getPublicRooms() {
+    return Array.from(this.rooms.values())
+      .filter(
+        (room) =>
+          room.config.isPublic &&
+          room.state.gameState === "waiting" &&
+          room.members.length < room.config.maxPlayers,
+      )
+      .map((room) => ({
+        roomId: room.roomId,
+        hostName:
+          room.members.find((member) => member.isHost)?.userName ??
+          "Unknown host",
+        memberCount: room.members.length,
+        maxPlayers: room.config.maxPlayers,
+        rounds: room.config.rounds,
+        drawTime: room.config.drawTime,
+        wordCount: room.config.wordCount,
+        hints: room.config.hints,
+        wordMode: room.config.wordMode,
+      }));
+  }
+
   addMember(
     roomId: string,
     userName: string,
@@ -206,6 +229,9 @@ class RoomService {
     room.state.completedMemberIds = room.state.completedMemberIds.filter(
       (memberId) => memberId !== userId,
     );
+    if (room.members.length === 0) {
+      this.rooms.delete(roomId);
+    }
     console.log(this.rooms);
     return member;
   }
@@ -274,10 +300,7 @@ class RoomService {
     const nextMember = room.members
       .slice(currentDrawerIndex + 1)
       .concat(room.members.slice(0, currentDrawerIndex))
-      .find(
-        (member) =>
-          !room.state.completedMemberIds.includes(member.userId),
-      );
+      .find((member) => !room.state.completedMemberIds.includes(member.userId));
 
     if (nextMember) {
       room.state.currentDrawerId = nextMember.userId;
@@ -327,7 +350,11 @@ class RoomService {
     return true;
   }
 
-  submitGuess(roomId: string, userId: string, guess: string): ScoreboardEntry[] | undefined {
+  submitGuess(
+    roomId: string,
+    userId: string,
+    guess: string,
+  ): ScoreboardEntry[] | undefined {
     const room = this.rooms.get(roomId);
     if (
       !room ||

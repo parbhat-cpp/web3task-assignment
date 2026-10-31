@@ -1,23 +1,14 @@
 import express from "express";
 
 import wordlistRouter from "./wordlist.route";
+import createRoomRouter from "./room.route";
+import type RoomService from "../services/RoomService";
 
-type Route = {
-  path: string;
-  router: express.Router;
+const createApiRouter = (roomService: RoomService) => {
+  const router = express.Router();
+  router.use("/wordlist", wordlistRouter);
+  router.use("/rooms", createRoomRouter(roomService));
+  return router;
 };
 
-const router = express.Router();
-
-const routes: Route[] = [
-  {
-    path: "/wordlist",
-    router: wordlistRouter,
-  },
-];
-
-routes.forEach((route) => {
-  router.use(route.path, route.router);
-});
-
-export default router;
+export default createApiRouter;

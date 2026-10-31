@@ -3,15 +3,16 @@ import type { Server } from "http";
 import express from "express";
 import cors from "cors";
 import type SocketIO from "socket.io";
+import type RoomService from "../services/RoomService";
 
-import apiRoutes from "../routes/index";
+import createApiRouter from "../routes/index";
 
 class ExpressServer {
   private expressApp!: Express;
   private expressServer!: Server;
   private port!: number;
 
-  constructor() {
+  constructor(private roomService: RoomService) {
     this.init();
   }
 
@@ -34,7 +35,7 @@ class ExpressServer {
     });
 
     // TODO: Add your API routes here
-    this.expressApp.use("/api", apiRoutes);
+    this.expressApp.use("/api", createApiRouter(this.roomService));
 
     this.expressServer = this.expressApp.listen(this.port, () => {
       console.log("Express server is running on port:", this.port);
