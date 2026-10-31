@@ -20,7 +20,7 @@ const isWordList = (value: unknown): value is WordList => {
     return false;
   }
 
-  const categories = value.categories;
+  const categories = value.categories as WordListCategory[];
   return (
     Array.isArray(categories) &&
     categories.every(

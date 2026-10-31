@@ -19,13 +19,6 @@ import {
   type WordList,
 } from "../services/wordlist";
 
-type Member = {
-  id: string;
-  name: string;
-  isHost?: boolean;
-  isDrawing?: boolean;
-};
-
 type Message = {
   id: string;
   name: string;
