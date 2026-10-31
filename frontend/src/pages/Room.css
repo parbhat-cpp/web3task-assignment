@@ -455,9 +455,18 @@
 
 .chat-form {
   display: flex;
+  flex: 0 0 auto;
   gap: 6px;
   padding-top: 14px;
   border-top: 1px solid var(--color-border);
+}
+
+.chat-panel {
+  min-height: 0;
+}
+
+.message-list {
+  min-height: 0;
 }
 
 .chat-form input {

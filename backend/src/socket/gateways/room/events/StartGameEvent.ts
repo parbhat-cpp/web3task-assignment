@@ -98,6 +98,7 @@ export class StartGameEvent extends SocketEvent<Payload, Result> {
         currentDrawerId: updatedRoom.state.currentDrawerId,
         currentTurnStartTime: updatedRoom.state.currentTurnStartTime,
         currentTurnEndTime: updatedRoom.state.currentTurnEndTime,
+        wordLength: updatedRoom.state.currentWord?.length ?? 0,
         completedMemberIds: updatedRoom.state.completedMemberIds,
       };
 

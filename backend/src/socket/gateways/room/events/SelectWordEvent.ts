@@ -51,6 +51,7 @@ export class SelectWordEvent extends SocketEvent<Payload, Result> {
         currentDrawerId: room.state.currentDrawerId,
         currentTurnStartTime: room.state.currentTurnStartTime,
         currentTurnEndTime: room.state.currentTurnEndTime,
+        wordLength: room.state.currentWord?.length ?? 0,
       };
 
       room.members.forEach((member) => {

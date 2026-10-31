@@ -73,6 +73,7 @@ function Room() {
   const [selectedCategoryId, setSelectedCategoryId] = useState("");
   const [selectedWords, setSelectedWords] = useState<string[]>([]);
   const [selectedWord, setSelectedWord] = useState<string | null>(null);
+  const [wordLength, setWordLength] = useState<number | null>(null);
   const [scoreboard, setScoreboard] = useState<ScoreboardEntry[]>([]);
   const [remainingTurnSeconds, setRemainingTurnSeconds] = useState<
     number | null
@@ -162,6 +163,7 @@ function Room() {
       setSelectedWord(data.currentWord);
     });
     socket.on("game_started", (data) => {
+      setWordLength(data.wordLength);
       setRoom((currentRoom) => {
         if (!currentRoom || currentRoom.roomId !== data.roomId) {
           return currentRoom;
@@ -189,6 +191,7 @@ function Room() {
     });
     socket.on("game_turn_started", (data) => {
       setSelectedWord(null);
+      setWordLength(data.wordLength);
       if (
         data.currentDrawerId === userId &&
         data.currentTurnStartTime === null
@@ -223,6 +226,7 @@ function Room() {
     });
     socket.on("game_finished", (data) => {
       setSelectedWord(null);
+      setWordLength(null);
       setRoom((currentRoom) => {
         if (!currentRoom || currentRoom.roomId !== data.roomId) {
           return currentRoom;
@@ -378,6 +382,7 @@ function Room() {
       userId,
     });
     setSelectedWord(selectedWords[0]);
+    setIsStartGameDialogOpen(false);
   };
 
   const displayedScoreboard =
@@ -483,6 +488,14 @@ function Room() {
             {selectedWord && room?.state.currentDrawerId === userId && (
               <span className="canvas-label">Your word: {selectedWord}</span>
             )}
+            {!selectedWord &&
+              wordLength !== null &&
+              room?.state.currentDrawerId !== userId && (
+                <span className="canvas-label">
+                  Word length: {wordLength}{" "}
+                  {wordLength === 1 ? "letter" : "letters"}
+                </span>
+              )}
             {(room?.members[0].userId === userId ||
               room?.state.currentDrawerId === userId) && (
               <button
