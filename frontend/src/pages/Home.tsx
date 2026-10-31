@@ -5,6 +5,7 @@ import { useSocket } from "../../hooks/useSocket";
 import { useAtom } from "jotai";
 import { roomAtom } from "../store/room.store";
 import { useNavigate } from "react-router-dom";
+import { API_URL } from "../config";
 
 type WordMode = "normal" | "hidden";
 
@@ -69,7 +70,7 @@ function Home() {
       setIsLoadingPublicRooms(true);
       setPublicRoomsError("");
       try {
-        const response = await fetch("http://localhost:5000/api/rooms/public");
+        const response = await fetch(`${API_URL}/api/rooms/public`);
         if (!response.ok) {
           throw new Error(`Public rooms request failed with status ${response.status}`);
         }

@@ -5,6 +5,7 @@ import "./index.css";
 import App from "./App.tsx";
 import SocketProvider from "../hooks/useSocket.tsx";
 import { Toaster } from "react-hot-toast";
+import { SOCKET_URL } from "./config";
 
 createRoot(document.getElementById("root")!).render(
   <StrictMode>
@@ -12,7 +13,7 @@ createRoot(document.getElementById("root")!).render(
       <SocketProvider
         config={{
           room: {
-            url: "http://localhost:5000/room",
+            url: SOCKET_URL + "/room",
           },
         }}
       >

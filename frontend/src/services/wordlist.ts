@@ -1,4 +1,6 @@
-const WORDLIST_URL = "http://localhost:5000/api/wordlist";
+import { API_URL } from "../config";
+
+const WORDLIST_URL = `${API_URL}/api/wordlist`;
 const WORDLIST_CACHE_KEY = "wordlist";
 
 export type WordListCategory = {
