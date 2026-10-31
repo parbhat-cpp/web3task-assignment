@@ -2,6 +2,8 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import type { PointerEvent as ReactPointerEvent } from "react";
 import "./DrawingCanvas.css";
 import { useSocket } from "../../hooks/useSocket";
+import { useAtom } from "jotai";
+import { roomAtom } from "../store/room.store";
 
 type Tool = "pen" | "eraser";
 type Point = { x: number; y: number };
@@ -24,6 +26,7 @@ type DrawPayload =
 
 type DrawingCanvasProps = {
   roomId: string;
+  turnKey: string;
 };
 
 const SWATCHES = [
@@ -85,8 +88,10 @@ const TrashIcon = () => (
   </svg>
 );
 
-export default function DrawingCanvas({ roomId }: DrawingCanvasProps) {
+export default function DrawingCanvas({ roomId, turnKey }: DrawingCanvasProps) {
   const socket = useSocket("room");
+  const [room] = useAtom(roomAtom);
+  const [userId] = useState(localStorage.getItem("userId") || "");
 
   const [tool, setTool] = useState<Tool>("pen");
   const [color, setColor] = useState<string>(SWATCHES[0]);
@@ -133,6 +138,17 @@ export default function DrawingCanvas({ roomId }: DrawingCanvasProps) {
     observer.observe(wrap);
     return () => observer.disconnect();
   }, [fitCanvas]);
+
+  useEffect(() => {
+    const canvas = canvasRef.current;
+    const ctx = canvas?.getContext("2d");
+    if (!canvas || !ctx) return;
+
+    ctx.setTransform(1, 0, 0, 1, 0, 0);
+    ctx.globalCompositeOperation = "source-over";
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    stroke.current = null;
+  }, [turnKey]);
 
   const toPoint = (e: { clientX: number; clientY: number }): Point => {
     const rect = canvasRef.current!.getBoundingClientRect();
@@ -194,9 +210,7 @@ export default function DrawingCanvas({ roomId }: DrawingCanvasProps) {
         ctx.strokeStyle = drawStyle.color;
         ctx.fillStyle = drawStyle.color;
         ctx.globalCompositeOperation =
-          drawStyle.tool === "eraser"
-            ? "destination-out"
-            : "source-over";
+          drawStyle.tool === "eraser" ? "destination-out" : "source-over";
       };
 
       const start = toCanvasPoint(
@@ -458,6 +472,7 @@ export default function DrawingCanvas({ roomId }: DrawingCanvasProps) {
           type="button"
           className="dc-clear"
           onClick={() => dialogRef.current?.showModal()}
+          disabled={room?.state.currentDrawerId !== userId}
         >
           <TrashIcon />
           Clear Canvas
@@ -475,6 +490,10 @@ export default function DrawingCanvas({ roomId }: DrawingCanvasProps) {
             onPointerUp={endStroke}
             onPointerCancel={endStroke}
             onPointerLeave={onPointerLeave}
+            style={{
+              pointerEvents:
+                room?.state.currentDrawerId === userId ? "auto" : "none",
+            }}
           />
           <div
             ref={ringRef}
@@ -509,6 +528,7 @@ export default function DrawingCanvas({ roomId }: DrawingCanvasProps) {
               type="button"
               className="dc-btn dc-btn-danger"
               onClick={clearCanvas}
+              disabled={room?.state.currentDrawerId !== userId}
             >
               Clear canvas
             </button>

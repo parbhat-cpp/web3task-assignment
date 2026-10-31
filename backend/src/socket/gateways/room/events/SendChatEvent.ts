@@ -49,6 +49,20 @@ export class SendChatEvent extends SocketEvent<Payload, Result> {
       if (!isMember) {
         throw new EventError("user_not_in_room");
       }
+      const scoreboard = this.roomService.submitGuess(
+        ctx.payload.roomId,
+        ctx.payload.userId,
+        ctx.payload.message,
+      );
+      if (scoreboard) {
+        room.members.forEach((member) => {
+          ctx.nsp.to(`user:${member.userId}`).emit("score_updated", {
+            roomId: room.roomId,
+            scoreboard,
+            guessedBy: ctx.payload.userId,
+          });
+        });
+      }
       room.members.forEach((member) => {
         if (member.userId !== ctx.payload.userId) {
           ctx.nsp.to(`user:${member.userId}`).emit("receive_chat", {

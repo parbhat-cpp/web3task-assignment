@@ -88,6 +88,7 @@ type RoomState = {
   currentTurnStartTime: number | null;
   currentTurnEndTime: number | null;
   completedMemberIds: string[];
+  guessedMemberIds: string[];
 };
 
 export type RoundParticipation = {
@@ -151,6 +152,7 @@ class RoomService {
         currentTurnStartTime: null,
         currentTurnEndTime: null,
         completedMemberIds: [],
+        guessedMemberIds: [],
       },
     };
     this.rooms.set(roomId, room);
@@ -227,7 +229,7 @@ class RoomService {
     return true;
   }
 
-  startGame(roomId: string, selectedWord: string): boolean {
+  startGame(roomId: string, selectedWord: string, userId?: string): boolean {
     const room = this.rooms.get(roomId);
     if (!room) return false;
 
@@ -235,9 +237,10 @@ class RoomService {
 
     room.state.gameState = "in-progress";
     room.state.currentRound = 1;
-    room.state.currentDrawerId = room.members[0]?.userId || null;
+    room.state.currentDrawerId = userId || room.members[0]?.userId || null;
     room.state.currentWord = selectedWord;
     room.state.completedMemberIds = [];
+    room.state.guessedMemberIds = [];
     room.members.forEach((member) => {
       member.score = 0;
     });
@@ -262,7 +265,90 @@ class RoomService {
       room.state.completedMemberIds.push(userId);
     }
 
-    return this.getRoundParticipation(roomId);
+    const participation = this.getRoundParticipation(roomId);
+    if (!participation) return undefined;
+
+    const currentDrawerIndex = room.members.findIndex(
+      (member) => member.userId === userId,
+    );
+    const nextMember = room.members
+      .slice(currentDrawerIndex + 1)
+      .concat(room.members.slice(0, currentDrawerIndex))
+      .find(
+        (member) =>
+          !room.state.completedMemberIds.includes(member.userId),
+      );
+
+    if (nextMember) {
+      room.state.currentDrawerId = nextMember.userId;
+      room.state.currentWord = null;
+      room.state.guessedMemberIds = [];
+      room.state.currentTurnStartTime = null;
+      room.state.currentTurnEndTime = null;
+      return participation;
+    }
+
+    if (room.state.currentRound >= room.config.rounds) {
+      room.state.gameState = "finished";
+      room.state.currentDrawerId = null;
+      room.state.currentWord = null;
+      room.state.currentTurnStartTime = null;
+      room.state.currentTurnEndTime = null;
+      return participation;
+    }
+
+    room.state.currentRound += 1;
+    room.state.completedMemberIds = [];
+    room.state.guessedMemberIds = [];
+    room.state.currentDrawerId = room.members[0]?.userId || null;
+    room.state.currentWord = null;
+    room.state.currentTurnStartTime = null;
+    room.state.currentTurnEndTime = null;
+
+    return participation;
+  }
+
+  selectWord(roomId: string, userId: string, selectedWord: string): boolean {
+    const room = this.rooms.get(roomId);
+    if (
+      !room ||
+      room.state.gameState !== "in-progress" ||
+      room.state.currentDrawerId !== userId ||
+      !this.isMemberInRoom(roomId, userId)
+    ) {
+      return false;
+    }
+
+    room.state.currentWord = selectedWord;
+    room.state.guessedMemberIds = [];
+    room.state.currentTurnStartTime = Date.now();
+    room.state.currentTurnEndTime =
+      room.state.currentTurnStartTime + room.config.drawTime * 1000;
+    return true;
+  }
+
+  submitGuess(roomId: string, userId: string, guess: string): ScoreboardEntry[] | undefined {
+    const room = this.rooms.get(roomId);
+    if (
+      !room ||
+      room.state.gameState !== "in-progress" ||
+      !room.state.currentWord ||
+      room.state.currentDrawerId === userId ||
+      room.state.guessedMemberIds.includes(userId) ||
+      !this.isMemberInRoom(roomId, userId)
+    ) {
+      return undefined;
+    }
+
+    if (guess.trim().toLowerCase() !== room.state.currentWord.toLowerCase()) {
+      return undefined;
+    }
+
+    room.state.guessedMemberIds.push(userId);
+    const member = room.members.find((current) => current.userId === userId);
+    if (!member) return undefined;
+    member.score += 1;
+    return this.getScoreboard(roomId);
   }
 
   getRoundParticipation(roomId: string): RoundParticipation | undefined {
@@ -283,7 +369,11 @@ class RoomService {
     };
   }
 
-  addScore(roomId: string, userId: string, points: number): ScoreboardEntry[] | undefined {
+  addScore(
+    roomId: string,
+    userId: string,
+    points: number,
+  ): ScoreboardEntry[] | undefined {
     const room = this.rooms.get(roomId);
     if (
       !room ||

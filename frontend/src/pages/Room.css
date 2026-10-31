@@ -122,6 +122,42 @@
   list-style: none;
 }
 
+.room-settings {
+  border-top: 1px solid var(--color-border);
+  padding-top: 16px;
+}
+
+.room-settings-heading h3 {
+  margin: 5px 0 0;
+  font-size: 0.9rem;
+}
+
+.room-settings-list {
+  display: grid;
+  gap: 8px;
+  margin: 14px 0 0;
+}
+
+.room-settings-list div {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.room-settings-list dt {
+  color: var(--color-text-subtle);
+  font-size: 0.7rem;
+}
+
+.room-settings-list dd {
+  margin: 0;
+  color: var(--color-text-muted);
+  font-family: 'DM Mono', monospace;
+  font-size: 0.68rem;
+  text-align: right;
+}
+
 .member {
   display: flex;
   align-items: center;
@@ -202,6 +238,38 @@
   line-height: 1.5;
 }
 
+.scoreboard {
+  margin-top: 16px;
+  border-top: 1px solid var(--color-border);
+  padding-top: 16px;
+}
+
+.scoreboard h3 {
+  margin: 5px 0 12px;
+  font-size: 0.9rem;
+}
+
+.scoreboard ol {
+  display: grid;
+  gap: 7px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.scoreboard li {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  color: var(--color-text-muted);
+  font-size: 0.72rem;
+}
+
+.scoreboard li strong {
+  color: var(--color-accent);
+  font-family: 'DM Mono', monospace;
+}
+
 .canvas-panel {
   display: grid;
   grid-template-rows: auto 1fr auto;
@@ -221,6 +289,12 @@
 .canvas-toolbar {
   justify-content: space-between;
   padding: 2px 4px;
+}
+
+.start-game-button {
+  width: auto;
+  padding: 8px 13px;
+  font-size: 0.72rem;
 }
 
 .canvas-label {
@@ -386,6 +460,139 @@
   overflow: hidden;
   clip: rect(0, 0, 0, 0);
   white-space: nowrap;
+}
+
+.dialog-backdrop {
+  position: fixed;
+  z-index: 10;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  padding: 20px;
+  background: rgba(0, 0, 0, 0.68);
+}
+
+.start-game-dialog {
+  width: min(100%, 560px);
+  max-height: min(720px, 90vh);
+  overflow-y: auto;
+  border: 1px solid var(--color-border-strong);
+  border-radius: 16px;
+  padding: 24px;
+  background: var(--color-surface);
+  box-shadow: 0 24px 80px rgba(0, 0, 0, 0.4);
+}
+
+.dialog-header,
+.word-picker-heading,
+.dialog-actions {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+}
+
+.dialog-header {
+  margin-bottom: 24px;
+}
+
+.dialog-header h2 {
+  margin: 5px 0 0;
+}
+
+.dialog-close {
+  width: 34px;
+  padding: 4px;
+  color: var(--color-text-muted);
+  background: transparent;
+  font-size: 1.5rem;
+  line-height: 1;
+}
+
+.dialog-close:hover {
+  color: var(--color-text);
+  background: var(--color-surface-raised);
+  transform: none;
+}
+
+.word-category-field {
+  display: grid;
+  gap: 8px;
+}
+
+.word-category-field span,
+.word-picker-heading > span {
+  color: var(--color-text);
+  font-size: 0.82rem;
+  font-weight: 600;
+}
+
+.word-category-field select {
+  width: 100%;
+  border: 1px solid var(--color-border-strong);
+  border-radius: 10px;
+  padding: 11px 12px;
+  color: var(--color-text);
+  background: var(--color-surface-raised);
+  font: inherit;
+}
+
+.word-picker {
+  margin-top: 20px;
+}
+
+.word-options {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 12px;
+}
+
+.word-option {
+  width: auto;
+  border: 1px solid var(--color-border);
+  padding: 9px 12px;
+  color: var(--color-text-muted);
+  background: var(--color-surface-raised);
+  font-size: 0.78rem;
+  font-weight: 500;
+}
+
+.word-option:hover,
+.word-option.selected {
+  border-color: var(--color-accent);
+  color: var(--color-accent-dark);
+  background: var(--color-accent);
+  transform: none;
+}
+
+.dialog-actions {
+  justify-content: flex-end;
+  margin-top: 28px;
+}
+
+.dialog-actions button {
+  width: auto;
+  min-width: 110px;
+  padding: 10px 14px;
+  font-size: 0.78rem;
+}
+
+.dialog-actions .dialog-cancel {
+  color: var(--color-text-muted);
+  background: transparent;
+}
+
+.dialog-actions .dialog-cancel:hover {
+  color: var(--color-text);
+  background: var(--color-surface-raised);
+  transform: none;
+}
+
+.dialog-actions button:disabled {
+  cursor: not-allowed;
+  opacity: 0.45;
+  transform: none;
 }
 
 @media (max-width: 1050px) {

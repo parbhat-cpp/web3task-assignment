@@ -7,6 +7,9 @@ import { RemoveMemberEvent } from "./events/RemoveMemberEvent";
 import { LeaveRoomEvent } from "./events/LeaveRoomEvent";
 import { SendChatEvent } from "./events/SendChatEvent";
 import { DrawEvent } from "./events/DrawEvent";
+import { StartGameEvent } from "./events/StartGameEvent";
+import { GameTurnEndEvent } from "./events/GameTurnEndEvent";
+import { SelectWordEvent } from "./events/SelectWordEvent";
 
 export class RoomGateway extends SocketGateway {
   readonly namespace = "/room";
@@ -23,6 +26,9 @@ export class RoomGateway extends SocketGateway {
       new LeaveRoomEvent(this.roomService),
       new SendChatEvent(this.roomService),
       new DrawEvent(this.roomService),
+      new StartGameEvent(this.roomService),
+      new GameTurnEndEvent(this.roomService),
+      new SelectWordEvent(this.roomService),
     ];
   }
 
