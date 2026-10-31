@@ -5,7 +5,7 @@ Express, and TypeScript.
 
 ## Live deployment
 
-**Live URL:** Not deployed yet (TBD).
+**Live URL:** [](https://web3task-assignment-1.onrender.com/).
 
 The application currently runs locally with the frontend on
 `http://localhost:5173` and the backend on `http://localhost:5000`.
