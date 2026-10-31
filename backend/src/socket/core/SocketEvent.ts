@@ -1,5 +1,5 @@
 import type { Socket } from "socket.io";
-import type { Ack, EventContext, EventMiddleware } from "./types";
+import type { Ack, EventContext, EventMiddleware } from "./types.js";
 
 /** Errors safe to show the client. Anything else becomes "internal_error". */
 export class EventError extends Error {}

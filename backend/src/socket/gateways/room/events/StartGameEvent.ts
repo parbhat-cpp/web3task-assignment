@@ -1,7 +1,7 @@
 import z from "zod";
-import { SocketEvent } from "../../../core/SocketEvent";
-import type RoomService from "../../../../services/RoomService";
-import type { EventContext } from "../../../core/types";
+import { SocketEvent } from "../../../core/SocketEvent.js";
+import type RoomService from "../../../../services/RoomService.js";
+import type { EventContext } from "../../../core/types.js";
 
 const StartGameSchema = z.object({
   userId: z.string().min(1).max(36).optional(),

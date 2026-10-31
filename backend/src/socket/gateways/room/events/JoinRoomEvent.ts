@@ -1,8 +1,8 @@
 import type z from "zod";
-import { EventError, SocketEvent } from "../../../core/SocketEvent";
-import { JoinRoomSchema, type Room } from "../../../../services/RoomService";
-import type RoomService from "../../../../services/RoomService";
-import type { EventContext } from "../../../core/types";
+import { EventError, SocketEvent } from "../../../core/SocketEvent.js";
+import { JoinRoomSchema, type Room } from "../../../../services/RoomService.js";
+import type RoomService from "../../../../services/RoomService.js";
+import type { EventContext } from "../../../core/types.js";
 
 type Payload = z.infer<typeof JoinRoomSchema>;
 type Result = {

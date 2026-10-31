@@ -1,8 +1,8 @@
-import ExpressServer from "./ExpressServer";
-import SocketServer from "./SocketServer";
-import RoomService from "../services/RoomService";
+import ExpressServer from "./ExpressServer.js";
+import SocketServer from "./SocketServer.js";
+import RoomService from "../services/RoomService.js";
 
-import { RoomGateway } from "../socket/gateways/room/RoomGateway";
+import { RoomGateway } from "../socket/gateways/room/RoomGateway.js";
 
 export default () => {
   const roomService = new RoomService();

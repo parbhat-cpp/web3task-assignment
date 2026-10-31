@@ -1,8 +1,8 @@
 import type z from "zod";
-import { DrawSchema } from "../../../../services/RoomService";
-import type RoomService from "../../../../services/RoomService";
-import { EventError, SocketEvent } from "../../../core/SocketEvent";
-import type { EventContext } from "../../../core/types";
+import { DrawSchema } from "../../../../services/RoomService.js";
+import type RoomService from "../../../../services/RoomService.js";
+import { EventError, SocketEvent } from "../../../core/SocketEvent.js";
+import type { EventContext } from "../../../core/types.js";
 
 type Payload = z.infer<typeof DrawSchema>;
 type Result = { success: true } | { success: false; error: string };

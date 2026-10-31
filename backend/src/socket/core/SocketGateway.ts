@@ -1,5 +1,5 @@
 import type { Namespace, Server, Socket } from "socket.io";
-import type { SocketEvent } from "./SocketEvent";
+import type { SocketEvent } from "./SocketEvent.js";
 
 type NamespaceMiddleware = Parameters<Namespace["use"]>[0];
 

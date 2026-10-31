@@ -1,6 +1,6 @@
 import express from "express";
-import type RoomService from "../services/RoomService";
-import { getPublicRooms } from "../controller/room.controller";
+import type RoomService from "../services/RoomService.js";
+import { getPublicRooms } from "../controller/room.controller.js";
 
 const createRoomRouter = (roomService: RoomService) => {
   const router = express.Router();

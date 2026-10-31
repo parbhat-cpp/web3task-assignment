@@ -1,5 +1,5 @@
 import type { Request, Response } from "express";
-import wordList from "../data/wordlist.json";
+import wordList from "../data/wordlist.json" with { type: "json" };
 
 export const getWordList = async (req: Request, res: Response) => {
   try {

@@ -3,9 +3,9 @@ import type { $strip } from "zod/v4/core";
 import RoomService, {
   RemoveMemberSchema,
   type Room,
-} from "../../../../services/RoomService";
-import { SocketEvent } from "../../../core/SocketEvent";
-import type { EventContext } from "../../../core/types";
+} from "../../../../services/RoomService.js";
+import { SocketEvent } from "../../../core/SocketEvent.js";
+import type { EventContext } from "../../../core/types.js";
 
 type Payload = z.infer<typeof RemoveMemberSchema>;
 type Result = {

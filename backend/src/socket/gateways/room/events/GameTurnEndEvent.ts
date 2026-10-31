@@ -1,7 +1,7 @@
 import z from "zod";
-import { EventError, SocketEvent } from "../../../core/SocketEvent";
-import type RoomService from "../../../../services/RoomService";
-import type { EventContext } from "../../../core/types";
+import { EventError, SocketEvent } from "../../../core/SocketEvent.js";
+import type RoomService from "../../../../services/RoomService.js";
+import type { EventContext } from "../../../core/types.js";
 
 const GameTurnEndSchema = z.object({
   roomId: z.string().min(1).max(10),

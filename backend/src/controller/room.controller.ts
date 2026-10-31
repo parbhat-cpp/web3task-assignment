@@ -1,5 +1,5 @@
 import type { Request, Response } from "express";
-import type RoomService from "../services/RoomService";
+import type RoomService from "../services/RoomService.js";
 
 export const getPublicRooms = (roomService: RoomService) => {
   return (_req: Request, res: Response) => {

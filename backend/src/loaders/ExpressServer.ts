@@ -3,9 +3,9 @@ import type { Server } from "http";
 import express from "express";
 import cors from "cors";
 import type SocketIO from "socket.io";
-import type RoomService from "../services/RoomService";
+import type RoomService from "../services/RoomService.js";
 
-import createApiRouter from "../routes/index";
+import createApiRouter from "../routes/index.js";
 
 class ExpressServer {
   private expressApp!: Express;

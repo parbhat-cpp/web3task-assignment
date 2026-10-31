@@ -1,6 +1,6 @@
 import express from "express";
 
-import { getWordList } from "../controller/wordlist.controller";
+import { getWordList } from "../controller/wordlist.controller.js";
 
 const router = express.Router();
 

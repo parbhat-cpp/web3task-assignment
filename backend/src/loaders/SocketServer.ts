@@ -1,7 +1,7 @@
 import * as SocketIO from "socket.io";
 import type { Server } from "http";
 import { randomUUID } from "node:crypto";
-import type { SocketGateway } from "../socket/core/SocketGateway";
+import type { SocketGateway } from "../socket/core/SocketGateway.js";
 
 class SocketServer {
   private readonly io!: SocketIO.Server;
