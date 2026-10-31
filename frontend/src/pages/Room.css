@@ -467,6 +467,7 @@
 
 .message-list {
   min-height: 0;
+  max-height: 90vh;
 }
 
 .chat-form input {
