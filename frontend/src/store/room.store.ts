@@ -7,6 +7,7 @@ type Room = {
     userId: string;
     userName: string;
     isHost: boolean;
+    score: number;
   }>;
   config: CreateRoomPayload;
 };

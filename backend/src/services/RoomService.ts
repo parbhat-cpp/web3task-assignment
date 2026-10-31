@@ -77,11 +77,38 @@ type Member = {
   userId: string;
   userName: string;
   isHost: boolean;
+  score: number;
+};
+
+type RoomState = {
+  gameState: "waiting" | "in-progress" | "finished";
+  currentRound: number;
+  currentDrawerId: string | null;
+  currentWord: string | null;
+  currentTurnStartTime: number | null;
+  currentTurnEndTime: number | null;
+  completedMemberIds: string[];
+};
+
+export type RoundParticipation = {
+  completedMemberIds: string[];
+  completedCount: number;
+  memberCount: number;
+  isComplete: boolean;
+};
+
+export type ScoreboardEntry = {
+  rank: number;
+  userId: string;
+  userName: string;
+  score: number;
+  isHost: boolean;
 };
 
 export type Room = {
   roomId: string;
   members: Array<Member>;
+  state: RoomState;
   config: z.infer<typeof CreateRoomSchema>;
 };
 
@@ -112,9 +139,19 @@ class RoomService {
           userId,
           userName: hostName,
           isHost: true,
+          score: 0,
         },
       ],
       config,
+      state: {
+        gameState: "waiting",
+        currentRound: 0,
+        currentDrawerId: null,
+        currentWord: null,
+        currentTurnStartTime: null,
+        currentTurnEndTime: null,
+        completedMemberIds: [],
+      },
     };
     this.rooms.set(roomId, room);
     console.log(this.rooms);
@@ -132,6 +169,7 @@ class RoomService {
   ): Member | undefined {
     const room = this.rooms.get(roomId);
     if (!room) return undefined;
+    if (room.state.gameState !== "waiting") return undefined;
 
     if (room.members.length >= room.config.maxPlayers) {
       return undefined;
@@ -147,6 +185,7 @@ class RoomService {
       userId,
       userName,
       isHost: false,
+      score: 0,
     };
     room.members.push(member);
     console.log(this.rooms);
@@ -162,6 +201,9 @@ class RoomService {
 
     const member = room.members[memberIndex];
     room.members.splice(memberIndex, 1);
+    room.state.completedMemberIds = room.state.completedMemberIds.filter(
+      (memberId) => memberId !== userId,
+    );
     console.log(this.rooms);
     return member;
   }
@@ -183,6 +225,98 @@ class RoomService {
     }
     console.log(this.rooms);
     return true;
+  }
+
+  startGame(roomId: string, selectedWord: string): boolean {
+    const room = this.rooms.get(roomId);
+    if (!room) return false;
+
+    if (room.state.gameState !== "waiting") return false;
+
+    room.state.gameState = "in-progress";
+    room.state.currentRound = 1;
+    room.state.currentDrawerId = room.members[0]?.userId || null;
+    room.state.currentWord = selectedWord;
+    room.state.completedMemberIds = [];
+    room.members.forEach((member) => {
+      member.score = 0;
+    });
+    room.state.currentTurnStartTime = Date.now();
+    room.state.currentTurnEndTime =
+      room.state.currentTurnStartTime + room.config.drawTime * 1000;
+
+    console.log(this.rooms);
+    return true;
+  }
+
+  completeCurrentTurn(
+    roomId: string,
+    userId: string,
+  ): RoundParticipation | undefined {
+    const room = this.rooms.get(roomId);
+    if (!room || room.state.gameState !== "in-progress") return undefined;
+    if (room.state.currentDrawerId !== userId) return undefined;
+    if (!this.isMemberInRoom(roomId, userId)) return undefined;
+
+    if (!room.state.completedMemberIds.includes(userId)) {
+      room.state.completedMemberIds.push(userId);
+    }
+
+    return this.getRoundParticipation(roomId);
+  }
+
+  getRoundParticipation(roomId: string): RoundParticipation | undefined {
+    const room = this.rooms.get(roomId);
+    if (!room) return undefined;
+
+    const memberIds = new Set(room.members.map((member) => member.userId));
+    const completedMemberIds = room.state.completedMemberIds.filter((userId) =>
+      memberIds.has(userId),
+    );
+
+    return {
+      completedMemberIds,
+      completedCount: completedMemberIds.length,
+      memberCount: room.members.length,
+      isComplete:
+        memberIds.size > 0 && completedMemberIds.length === memberIds.size,
+    };
+  }
+
+  addScore(roomId: string, userId: string, points: number): ScoreboardEntry[] | undefined {
+    const room = this.rooms.get(roomId);
+    if (
+      !room ||
+      room.state.gameState === "waiting" ||
+      !Number.isInteger(points) ||
+      points < 0
+    ) {
+      return undefined;
+    }
+
+    const member = room.members.find((current) => current.userId === userId);
+    if (!member) return undefined;
+
+    member.score += points;
+    return this.getScoreboard(roomId);
+  }
+
+  getScoreboard(roomId: string): ScoreboardEntry[] | undefined {
+    const room = this.rooms.get(roomId);
+    if (!room) return undefined;
+
+    return room.members
+      .map((member) => ({
+        userId: member.userId,
+        userName: member.userName,
+        score: member.score,
+        isHost: member.isHost,
+      }))
+      .sort((left, right) => right.score - left.score)
+      .map((member, index) => ({
+        rank: index + 1,
+        ...member,
+      }));
   }
 }
 
